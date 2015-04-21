@@ -26,14 +26,14 @@ int main(int argc, char * argv[]) {
 	ImageIO::debugFolder = "D:\\Users\\Edwin\\Downloads\\FaceMinMin";
 	ImageIO::isInDebugMode = true; //If set to false the ImageIO class will skip any image save function calls
 
-
-
 	RGBImage * input = ImageFactory::newRGBImage();
+
 	if (!ImageIO::loadImage("C:\\Users\\Edwin\\Documents\\GitHub\\HU-Vision-1415-Base\\testsets\\Set A\\TestSet Images\\child-1.png", *input)) {
 		std::cout << "Image could not be loaded!" << std::endl;
 		system("pause");
 		return 0;
 	}
+	
 
 
 	ImageIO::saveRGBImage(*input, ImageIO::getDebugFileName("debug.png"));
@@ -47,7 +47,7 @@ int main(int argc, char * argv[]) {
 		}
 	}
 
-	//std::cout << "Elapsed time in microseconds: " << bt.elapsedMicroSeconds() << std::endl;
+	std::cout << "Elapsed time in microseconds: " << bt.elapsedMicroSeconds() << std::endl;
 
 
 	delete executor;
@@ -67,11 +67,12 @@ int main(int argc, char * argv[]) {
 bool executeSteps(DLLExecution * executor) {
 
 	//Execute the four Pre-processing steps
+	bt.start();
 	if (!executor->executePreProcessingStep1(true)) {
 		std::cout << "Pre-processing step 1 failed!" << std::endl;
 		return false;
 	}
-
+	bt.stop();
 	if (!executor->executePreProcessingStep2(false)) {
 		std::cout << "Pre-processing step 2 failed!" << std::endl;
 		return false;
