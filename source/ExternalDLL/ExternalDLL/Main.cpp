@@ -23,13 +23,13 @@ int main(int argc, char * argv[]) {
 	ImageFactory::setImplementation(ImageFactory::STUDENT);
 
 
-	ImageIO::debugFolder = "D:\\Users\\Edwin\\Downloads\\FaceMinMin";
+	ImageIO::debugFolder = "..\\..\\..\\FaceMinMin";
 	ImageIO::isInDebugMode = true; //If set to false the ImageIO class will skip any image save function calls
 
 
 
 	RGBImage * input = ImageFactory::newRGBImage();
-	if (!ImageIO::loadImage("C:\\Users\\Edwin\\Documents\\GitHub\\HU-Vision-1415-Base\\testsets\\Set A\\TestSet Images\\child-1.png", *input)) {
+	if (!ImageIO::loadImage("..\\..\\..\\testsets\\Set A\\TestSet Images\\child-1.png", *input)) {
 		std::cout << "Image could not be loaded!" << std::endl;
 		system("pause");
 		return 0;
