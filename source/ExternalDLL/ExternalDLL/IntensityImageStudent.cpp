@@ -34,33 +34,17 @@ void IntensityImageStudent::set(const IntensityImageStudent &other) {
 }
 //done
 void IntensityImageStudent::setPixel(int x, int y, Intensity pixel) {
-	int pixelPosition = (y * this->getWidth()) + x;
-	if (pixelPosition < static_cast<int>(m_pixelStorage.size()) && pixelPosition >= 0){
-		m_pixelStorage[pixelPosition] = pixel;
-	}
+	m_pixelStorage[(y * this->getWidth()) + x] = pixel;
 }
 //done
 void IntensityImageStudent::setPixel(int i, Intensity pixel) {
-	if (i < static_cast<int>(m_pixelStorage.size()) && i >= 0){
-		m_pixelStorage[i] = pixel;
-	}
+	m_pixelStorage[i] = pixel;
 }
 //done
 Intensity IntensityImageStudent::getPixel(int x, int y) const {
-	int pixelPosition = (y * this->getWidth()) + x;
-	if (pixelPosition < static_cast<int>(m_pixelStorage.size()) && pixelPosition >= 0){
-		return m_pixelStorage[pixelPosition];
-	}
-	else{
-		return 0;
-	}
+	return m_pixelStorage[(y * this->getWidth()) + x];
 }
 //done
 Intensity IntensityImageStudent::getPixel(int i) const {
-	if (i < static_cast<int>(m_pixelStorage.size()) && i >= 0){
-		return m_pixelStorage[i];
-	}
-	else{
-		return 0;
-	}
+	return m_pixelStorage[i];
 }

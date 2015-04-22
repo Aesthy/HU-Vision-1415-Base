@@ -40,9 +40,18 @@ IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image,
 
 	//Applying kernel
 	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
-	int imageSize = image.getWidth() * image.getHeight();
-	for (int i = 0; i < imageSize; ++i){
-
+	int maxY = image.getHeight() - (kernelSize / 2);
+	int maxX = image.getWidth() - (kernelSize / 2);
+	double sum = 0;
+	for (int y = kernelSize / 2; y < maxY; ++y){
+		for (int x = kernelSize / 2; x < maxX; ++x){
+			sum = 0;
+			for (auto pixel : kernel){
+				sum += image.getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
+			}
+			//std::cout << sum  << std::endl;
+			IM->setPixel(x, y, (sum / normalisationFactor));
+		}
 	}
 	return IM;
 }
