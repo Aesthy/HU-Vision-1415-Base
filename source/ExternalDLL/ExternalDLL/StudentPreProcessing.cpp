@@ -11,8 +11,8 @@ IntensityImage * StudentPreProcessing::stepToIntensityImage(const RGBImage &imag
 	RGB rgb;
 	for (int i = 0; i < imageSize; ++i){
 		rgb = image.getPixel(i);
-		Intensity p = (0.2126 * rgb.r) + (0.7152 * rgb.g) + (0.0722 * rgb.b);
-		//Intensity p = rgb.g;
+		//Intensity p = (0.2126 * rgb.r) + (0.7152 * rgb.g) + (0.0722 * rgb.b);
+		Intensity p = rgb.g;
 		IM->setPixel(i, p);
 	}	
 	return IM;
@@ -26,7 +26,7 @@ IntensityImage * StudentPreProcessing::stepScaleImage(const IntensityImage &imag
 IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image, int kernelSize) const{
 	//Creating kernel
 	double normalisationFactor = 0;
-	double sigma = kernelSize/3;
+	double sigma = 2.5;
 	std::vector<std::tuple<int, int, double>> kernel;
 	kernel.resize(kernelSize * kernelSize);
 	for (int y = 0; y < kernelSize; ++y){
@@ -59,21 +59,18 @@ IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image,
 IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &image) const {
 
 	std::vector<std::tuple<int, int, double>> kernel{
-		//std::make_tuple(-1, 0, 1),
-		//std::make_tuple(0, 0, -2),
-		//std::make_tuple(1, 0, 1)
-		//std::make_tuple(-1, 1, 0),
-		//std::make_tuple(0, 1, 1.0),
-		//std::make_tuple(1, 1, 0),
-		std::make_tuple(-1, 0, 1.0),
-		std::make_tuple(0, 0, -4.0),
-		std::make_tuple(1, 0, 1.0),
-		//std::make_tuple(-1, -1, 0),
-		//std::make_tuple(0, -1, 1.0),
-		//std::make_tuple(1, -1, 0)
+		std::make_tuple(-1, -1, 0.5),
+		std::make_tuple(0, -1, 1),
+		std::make_tuple(1, -1, 0.5),
+		std::make_tuple(-1, 0, 1),
+		std::make_tuple(0, 0, -6),
+		std::make_tuple(1, 0, 1),
+		std::make_tuple(-1, 1, 0.5),
+		std::make_tuple(0, 1, 1),
+		std::make_tuple(1, 1, 0.5),
 	};
 
-	IntensityImage* GIM = applyGaussian(image, 3);
+	IntensityImage* GIM = applyGaussian(image, 5);
 	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
 
 
@@ -81,7 +78,7 @@ IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &i
 	int maxX = image.getWidth() - 2;
 	int maxY = image.getHeight() - 2;
 	for (int y = 2; y < maxY; ++y){
-		for (int x = 2; x < maxX; ++x){
+		for (int x = 2; x < maxX ; ++x){
 			sum = 0;
 			for (auto pixel : kernel){
 				sum += GIM->getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
@@ -94,5 +91,16 @@ IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &i
 }
 
 IntensityImage * StudentPreProcessing::stepThresholding(const IntensityImage &image) const {
-	return nullptr;
+	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
+	int imageSize = image.getWidth() * image.getHeight();
+	for (int i = 0; i < imageSize; ++i){
+		Intensity p = image.getPixel(i);
+		if (p > 130){
+			IM->setPixel(i, 0);
+		}
+		else{
+			IM->setPixel(i, 255);
+		}
+	}
+	return IM;
 }
