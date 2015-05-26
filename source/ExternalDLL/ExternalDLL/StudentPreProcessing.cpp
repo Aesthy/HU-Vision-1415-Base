@@ -19,9 +19,36 @@ IntensityImage * StudentPreProcessing::stepToIntensityImage(const RGBImage &imag
 }
 
 IntensityImage * StudentPreProcessing::stepScaleImage(const IntensityImage &image) const {
-	return nullptr;
-}
+	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
+	if (image.getWidth() * image.getHeight() <= 40000){
+		for (int y = 0; y < image.getHeight(); ++y){
+			for (int x = 0; x < image.getWidth(); ++x){
+				IM->setPixel(x, y, image.getPixel(x, y));
+			}
+		}
+		return IM;
+	}
+	int pixelCount = image.getHeight() * image.getWidth();
+	float mult = static_cast<float>(40000) / pixelCount;
+	mult = sqrt(mult);
+	IM = new IntensityImageStudent(image.getWidth() * mult, image.getHeight() * mult);
 
+	float newIntensity = 0;
+	for (int y = 0; y < IM->getHeight(); ++y){
+		for (int x = 0; x < IM->getWidth(); ++x){
+			float oldX = x / mult;
+			float oldY = y / mult;
+			float dX = 1 - (oldX - floor(oldX));
+			float dY = 1 - (oldY - floor(oldY));
+			newIntensity = (dX * dY) * image.getPixel(floor(oldX), floor(oldY));
+			newIntensity += ((1 - dX) * dY) * image.getPixel(floor(oldX) + 1, floor(oldY));
+			newIntensity += (dX * (1 - dY)) * image.getPixel(floor(oldX), floor(oldY) + 1);
+			newIntensity += ((1 - dX) * (1 - dY)) * image.getPixel(floor(oldX) + 1, floor(oldY) + 1);
+			IM->setPixel(x , y, newIntensity);
+		}
+	}
+	return IM;
+}
 
 IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image, int kernelSize) const{
 	//Creating kernel
@@ -59,34 +86,78 @@ IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image,
 IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &image) const {
 
 	std::vector<std::tuple<int, int, double>> kernel{
-		std::make_tuple(-1, -1, 0.5),
-		std::make_tuple(0, -1, 1),
-		std::make_tuple(1, -1, 0.5),
-		std::make_tuple(-1, 0, 1),
-		std::make_tuple(0, 0, -6),
-		std::make_tuple(1, 0, 1),
-		std::make_tuple(-1, 1, 0.5),
-		std::make_tuple(0, 1, 1),
-		std::make_tuple(1, 1, 0.5),
+
+		std::make_tuple(-1, 2, 1),
+		std::make_tuple(0, 2, 1),
+		std::make_tuple(1, 2, 1),
+		std::make_tuple(-1, 3, 1),
+		std::make_tuple(0, 3, 1),
+		std::make_tuple(1, 3, 1),
+		std::make_tuple(-1, 4, 1),
+		std::make_tuple(0, 4, 1),
+		std::make_tuple(1, 4, 1),
+
+		std::make_tuple(-4, -1, 1),
+		std::make_tuple(-3, -1, 1),
+		std::make_tuple(-2, -1, 1),
+		std::make_tuple(-4, 0, 1),
+		std::make_tuple(-3, 0, 1),
+		std::make_tuple(-2, 0, 1),
+		std::make_tuple(-4, 1, 1),
+		std::make_tuple(-3, 1, 1),
+		std::make_tuple(-2, 1, 1),
+
+		std::make_tuple(-1, -1, -4),
+		std::make_tuple(0, -1, -4),
+		std::make_tuple(1, -1, -4),
+		std::make_tuple(-1, 0, -4),
+		std::make_tuple(0, 0, -4),
+		std::make_tuple(1, 0, -4),
+		std::make_tuple(-1, 1, -4),
+		std::make_tuple(0, 1, -4),
+		std::make_tuple(1, 1, -4),
+
+		std::make_tuple(4, -1, 1),
+		std::make_tuple(3, -1, 1),
+		std::make_tuple(2, -1, 1),
+		std::make_tuple(4, 0, 1),
+		std::make_tuple(3, 0, 1),
+		std::make_tuple(2, 0, 1),
+		std::make_tuple(4, 1, 1),
+		std::make_tuple(3, 1, 1),
+		std::make_tuple(2, 1, 1),
+
+		std::make_tuple(-1, -4, 1),
+		std::make_tuple(0, -4, 1),
+		std::make_tuple(1, -4, 1),
+		std::make_tuple(-1, -3, 1),
+		std::make_tuple(0, -3, 1),
+		std::make_tuple(1, -3, 1),
+		std::make_tuple(-1, -2, 1),
+		std::make_tuple(0, -2, 1),
+		std::make_tuple(1, -2, 1)
 	};
 
-	IntensityImage* GIM = applyGaussian(image, 5);
 	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
 
-
 	double sum = 0;
-	int maxX = image.getWidth() - 2;
-	int maxY = image.getHeight() - 2;
-	for (int y = 2; y < maxY; ++y){
-		for (int x = 2; x < maxX ; ++x){
+	int maxX = image.getWidth() - sqrt(kernel.size());
+	int maxY = image.getHeight() - sqrt(kernel.size());;
+	for (int y = sqrt(kernel.size()); y < maxY; ++y){
+		for (int x = sqrt(kernel.size()); x < maxX; ++x){
 			sum = 0;
 			for (auto pixel : kernel){
-				sum += GIM->getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
+				sum += image.getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
 			}
-			IM->setPixel(x, y, sum + 127);
+			if (sum > 255){
+				sum = 255;
+			}
+			if (sum < 0){
+				sum = 0;
+			}
+			IM->setPixel(x, y, sum);
 		}
 	}
-	delete GIM;
 	return IM;
 }
 
@@ -95,7 +166,7 @@ IntensityImage * StudentPreProcessing::stepThresholding(const IntensityImage &im
 	int imageSize = image.getWidth() * image.getHeight();
 	for (int i = 0; i < imageSize; ++i){
 		Intensity p = image.getPixel(i);
-		if (p > 130){
+		if (p > 200){
 			IM->setPixel(i, 0);
 		}
 		else{

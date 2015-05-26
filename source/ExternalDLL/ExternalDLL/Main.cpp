@@ -46,7 +46,7 @@ int main(int argc, char * argv[]) {
 			std::cout << (i+1) << ": " << executor->facialParameters[i] << std::endl;
 		}
 	}
-	//std::cout << "Elapsed time in microseconds: " << bt.elapsedMicroSeconds() << std::endl;
+	std::cout << "Elapsed time in microseconds: " << bt.elapsedMicroSeconds() << std::endl;
 
 	delete executor;
 	system("pause");
@@ -65,23 +65,23 @@ int main(int argc, char * argv[]) {
 bool executeSteps(DLLExecution * executor) {
 
 	//Execute the four Pre-processing steps
+	bt.start();
+
 	if (!executor->executePreProcessingStep1(true)) {
 		std::cout << "Pre-processing step 1 failed!" << std::endl;
 		return false;
 	}
 
-	if (!executor->executePreProcessingStep2(false)) {
+
+	if (!executor->executePreProcessingStep2(true)) {
 		std::cout << "Pre-processing step 2 failed!" << std::endl;
 		return false;
 	}
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep2, ImageIO::getDebugFileName("Pre-processing-2.png"));
-	bt.start();
 	if (!executor->executePreProcessingStep3(true)) {
 		std::cout << "Pre-processing step 3 failed!" << std::endl;
 		return false;
 	}
-	bt.stop();
-	std::cout << "Elapsed time in microseconds: " << bt.elapsedMicroSeconds() << std::endl;
 
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep3, ImageIO::getDebugFileName("Pre-processing-3.png"));
 
@@ -90,6 +90,7 @@ bool executeSteps(DLLExecution * executor) {
 		return false;
 	}
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep4, ImageIO::getDebugFileName("Pre-processing-4.png"));
+	bt.stop();
 
 
 
