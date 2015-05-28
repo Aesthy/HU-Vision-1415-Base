@@ -85,7 +85,7 @@ IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image,
 
 IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &image) const {
 
-	std::vector<std::tuple<int, int, double>> kernel{
+	/*std::vector<std::tuple<int, int, double>> kernel{
 
 		std::make_tuple(-1, 2, 1),
 		std::make_tuple(0, 2, 1),
@@ -136,6 +136,18 @@ IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &i
 		std::make_tuple(-1, -2, 1),
 		std::make_tuple(0, -2, 1),
 		std::make_tuple(1, -2, 1)
+	};*/
+
+	std::vector<int> kernel{
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		1, 1, 1, -4, -4, -4, 1, 1, 1,
+		1, 1, 1, -4, -4, -4, 1, 1, 1,
+		1, 1, 1, -4, -4, -4, 1, 1, 1,
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0
 	};
 
 	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
@@ -143,19 +155,44 @@ IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &i
 	double sum = 0;
 	int maxX = image.getWidth() - sqrt(kernel.size());
 	int maxY = image.getHeight() - sqrt(kernel.size());;
-	for (int y = sqrt(kernel.size()); y < maxY; ++y){
-		for (int x = sqrt(kernel.size()); x < maxX; ++x){
-			sum = 0;
-			for (auto pixel : kernel){
-				sum += image.getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
+	int cubeSize = 32;
+	int kernelWidth = sqrt(kernel.size());
+	//for (int y = sqrt(kernel.size()); y < maxY; ++y){
+	//	for (int x = sqrt(kernel.size()); x < maxX; ++x){
+	for (int cubeY = 0; cubeY < ceil(image.getHeight() / cubeSize); ++cubeY){
+		for (int cubeX = 0; cubeX < ceil(image.getWidth() / cubeSize); ++cubeX){
+			for (int y = cubeY * cubeSize; y < cubeSize + (cubeY * cubeSize); ++y){
+				for (int x = cubeX * cubeSize; x < cubeSize + (cubeX * cubeSize); ++x){
+					if (x >= image.getWidth() || y >= image.getHeight()) continue;
+					sum = 0;
+					//for (auto pixel : kernel){
+					//	sum += image.getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
+					//}
+					for (int kernelY = -(kernelWidth / 2); kernelY < (kernelWidth / 2); ++kernelY){
+						for (int kernelX = -(kernelWidth / 2); kernelX < (kernelWidth / 2); ++kernelX){
+							sum += image.getPixel(x + kernelX, y + kernelY) * kernel[(kernelY * sqrt(kernel.size())) + kernelX];
+						}
+					}
+					if (sum > 255){
+						sum = 255;
+					}
+					if (sum < 0){
+						sum = 0;
+					}
+					IM->setPixel(x, y, sum);
+				}
 			}
-			if (sum > 255){
-				sum = 255;
-			}
-			if (sum < 0){
-				sum = 0;
-			}
-			IM->setPixel(x, y, sum);
+			//sum = 0;		
+			//for (auto pixel : kernel){
+			//	sum += image.getPixel(x + std::get<0>(pixel), y + std::get<1>(pixel)) * std::get<2>(pixel);
+			//}
+			//if (sum > 255){
+			//	sum = 255;
+			//}
+			//if (sum < 0){
+			//	sum = 0;
+			//}
+			//IM->setPixel(x, y, sum);
 		}
 	}
 	return IM;
