@@ -106,39 +106,36 @@ IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &i
 	int imageWidth = image.getWidth();
 	int sum = 0;
 	int temp = 0;
-	int maxX = image.getWidth() - 4;
-	int maxY = image.getHeight() - 4;
-	for (int y = 4; y < maxY; ++y){
-		for (int x = 4; x < maxX; ++x){
+	int kernelWidth = 3;
+	int kernelRadius = 4;
+	int blockWidth = 3;
+
+	int maxX = image.getWidth() - kernelRadius;
+	int maxY = image.getHeight() - kernelRadius;
+	for (int y = kernelRadius; y < maxY; ++y){
+		for (int x = kernelRadius; x < maxX; ++x){
 			sum = 0;
-			//for (int ky = 0; ky < 3; ++ky){
-				//for (int kx = 0; kx < 3; ++kx){
+			for (int ky = 0; ky < kernelWidth; ++ky){
+				for (int kx = 0; kx < kernelWidth; ++kx){
 					temp = 0;
-					//if (kernel[ky * 3 + kx] == 0) {
-						//continue;
-					//}
-					for (int by = 0; by < 3; ++by){
-						for (int bx = 0; bx < 3; ++bx){
-							sum += image.getPixel((x - 4 - (3 + bx)) + imageWidth * (y - 4 - (0 + by)));
-							sum += image.getPixel((x - 4 - (0 + bx)) + imageWidth * (y - 4 - (3 + by)));
-							sum += image.getPixel((x - 4 - (6 + bx)) + imageWidth * (y - 4 - (3 + by)));
-							sum += image.getPixel((x - 4 - (3 + bx)) + imageWidth * (y - 4 - (6 + by)));
-							temp += image.getPixel((x - 4 - (3 + bx)) + imageWidth * (y - 4 - (3 + by)));
+					if (kernel[ky * kernelWidth + kx] == 0) {
+						continue;
+					}
+					for (int by = 0; by < blockWidth; ++by){
+						for (int bx = 0; bx < blockWidth; ++bx){
+							temp += image.getPixel((x - kernelRadius + bx + (kx * blockWidth)) + (imageWidth * (y - kernelRadius + by + (ky * blockWidth))));
 						}
 					}
-					sum += temp * -4;
-
-					//if (kernel[ky * 9 + kx] == 0) continue;
-					//sum += image.getPixel((x - kx - 4) + imageWidth * (y - ky - 4)) * kernel[ky * 9 + kx];
-				/*}
-			}*/
+					sum += temp * kernel[ky * kernelWidth + kx];
+				}
+			}
 			if (sum > 255){
 				sum = 255;
 			}
 			if (sum < 0){
 				sum = 0;
 			}
-			IM->setPixel(x - 4 + imageWidth * (y - 4), sum);
+			IM->setPixel(x + imageWidth * y, sum);
 		}
 	}
 	return IM;
