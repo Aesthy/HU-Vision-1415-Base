@@ -85,7 +85,22 @@ IntensityImage* StudentPreProcessing::applyGaussian(const IntensityImage &image,
 }
 
 IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &image) const {
-	//std::array<int, 9 * 9> kernel{ {
+	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
+	// Initialise base kernel
+	std::array<int, 3 * 3> kernel{ {
+			0, 1, 0,
+			1,-4, 1,
+			0, 1, 0, 
+		} };
+	int imageWidth = image.getWidth();
+	int sum = 0;
+	int temp = 0;
+	//Width of the base 3x3 kernel
+	int kernelWidth = 3;
+	//Radius of the kernel when taking blockWidth in account
+	int kernelRadius = 4;
+	//Width of the blocks, all elements in the base kernel represent a single block.
+	//For example if blockWidth is 3 the kernel wil look like this:
 	//		0, 0, 0, 1, 1, 1, 0, 0, 0,
 	//		0, 0, 0, 1, 1, 1, 0, 0, 0,
 	//		0, 0, 0, 1, 1, 1, 0, 0, 0,
@@ -95,46 +110,42 @@ IntensityImage * StudentPreProcessing::stepEdgeDetection(const IntensityImage &i
 	//		0, 0, 0, 1, 1, 1, 0, 0, 0,
 	//		0, 0, 0, 1, 1, 1, 0, 0, 0,
 	//		0, 0, 0, 1, 1, 1, 0, 0, 0
-	//	} };
-	std::array<int, 3 * 3> kernel{ {
-			0, 1, 0,
-			1,-4, 1,
-			0, 1, 0, 
-		} };
-
-	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
-	int imageWidth = image.getWidth();
-	int sum = 0;
-	int temp = 0;
-	int kernelWidth = 3;
-	int kernelRadius = 4;
 	int blockWidth = 3;
 
 	int maxX = image.getWidth() - kernelRadius;
 	int maxY = image.getHeight() - kernelRadius;
+	// Loop through all pixels except the outer rows where the kernel doesnt fit.
 	for (int y = kernelRadius; y < maxY; ++y){
 		for (int x = kernelRadius; x < maxX; ++x){
 			sum = 0;
+			// Loop thought the kernel
 			for (int ky = 0; ky < kernelWidth; ++ky){
 				for (int kx = 0; kx < kernelWidth; ++kx){
 					temp = 0;
+					// Skip a block if the element in the kernel has the value 0
 					if (kernel[ky * kernelWidth + kx] == 0) {
 						continue;
 					}
+					// Loop through block of pixels that are to be evaluated
 					for (int by = 0; by < blockWidth; ++by){
 						for (int bx = 0; bx < blockWidth; ++bx){
-							temp += image.getPixel((x - kernelRadius + bx + (kx * blockWidth)) + (imageWidth * (y - kernelRadius + by + (ky * blockWidth))));
+							// Add an evaluated pixels value to the sum of the block
+							temp += image.getPixel((x - kernelRadius + bx + (kx * blockWidth)) + 
+								(imageWidth * (y - kernelRadius + by + (ky * blockWidth))));
 						}
 					}
+					// add the blocks weighed value to the total sum, no normalisation is required for laplacian
 					sum += temp * kernel[ky * kernelWidth + kx];
 				}
 			}
+			// making sure the intensity values are within limits
 			if (sum > 255){
 				sum = 255;
 			}
 			if (sum < 0){
 				sum = 0;
 			}
+			// Set the pixel according to the sum
 			IM->setPixel(x + imageWidth * y, sum);
 		}
 	}
@@ -146,7 +157,7 @@ IntensityImage * StudentPreProcessing::stepThresholding(const IntensityImage &im
 	int imageSize = image.getWidth() * image.getHeight();
 	for (int i = 0; i < imageSize; ++i){
 		Intensity p = image.getPixel(i);
-		if (p > 200){
+		if (p > 220){
 			IM->setPixel(i, 0);
 		}
 		else{
