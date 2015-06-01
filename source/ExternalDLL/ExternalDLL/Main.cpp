@@ -27,7 +27,7 @@ int main(int argc, char * argv[]) {
 	ImageIO::isInDebugMode = true; //If set to false the ImageIO class will skip any image save function calls
 
 	RGBImage * input = ImageFactory::newRGBImage();
-	if (!ImageIO::loadImage("..\\..\\..\\testsets\\Set A\\TestSet Images\\male-2.png", *input)) {
+	if (!ImageIO::loadImage("..\\..\\..\\testsets\\Set A\\TestSet Images\\female-3.png", *input)) {
 
 		std::cout << "Image could not be loaded!" << std::endl;
 		system("pause");
@@ -71,14 +71,14 @@ bool executeSteps(DLLExecution * executor) {
 	}
 
 
-	if (!executor->executePreProcessingStep2(true)) {
+	if (!executor->executePreProcessingStep2(false)) {
 		std::cout << "Pre-processing step 2 failed!" << std::endl;
 		return false;
 	}
 	bt.start();
 
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep2, ImageIO::getDebugFileName("Pre-processing-2.png"));
-	if (!executor->executePreProcessingStep3(true)) {
+	if (!executor->executePreProcessingStep3(false)) {
 		std::cout << "Pre-processing step 3 failed!" << std::endl;
 		return false;
 	}

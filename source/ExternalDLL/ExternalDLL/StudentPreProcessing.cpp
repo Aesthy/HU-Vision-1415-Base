@@ -5,6 +5,10 @@
 #include <math.h>
 #include <iostream>
 #include <array>
+#include <algorithm>
+
+#include <fstream>
+#include<string>
 
 IntensityImage * StudentPreProcessing::stepToIntensityImage(const RGBImage &image) const {
 	int imageSize = image.getWidth() * image.getHeight();
@@ -13,9 +17,31 @@ IntensityImage * StudentPreProcessing::stepToIntensityImage(const RGBImage &imag
 	for (int i = 0; i < imageSize; ++i){
 		rgb = image.getPixel(i);
 		//Intensity p = (0.2126 * rgb.r) + (0.7152 * rgb.g) + (0.0722 * rgb.b);
+		//Intensity p = (rgb.r + rgb.g + rgb.b) / 3;
+		//Intensity p = (std::max(std::max(rgb.r, rgb.g), rgb.b) + std::min(std::min(rgb.r, rgb.g), rgb.b)) / 2;
 		Intensity p = rgb.g;
 		IM->setPixel(i, p);
 	}	
+
+	//Meetrapport!
+	/*std::vector<int> histo(256);
+
+	std::ofstream myfile;
+	myfile.open("..\\..\\..\\FaceMinMin\\Histo\\hist.csv");
+	for (int y = 0; y < image.getHeight(); y++){
+		for (int x = 0; x < image.getWidth(); x++){
+			histo[IM->getPixel(x, y)] += 1;
+		}
+	}
+
+	for (int i = 0; i < histo.size(); ++i){
+		myfile << std::to_string(histo[i]) + ",";
+	}
+
+	myfile.close();*/
+
+
+
 	return IM;
 }
 
