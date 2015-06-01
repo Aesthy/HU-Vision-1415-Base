@@ -34,7 +34,7 @@ void IntensityImageStudent::set(const IntensityImageStudent &other) {
 }
 //done
 void IntensityImageStudent::setPixel(int x, int y, Intensity pixel) {
-	m_pixelStorage[(y * this->getWidth()) + x] = pixel;
+	m_pixelStorage[(y * getWidth()) + x] = pixel;
 }
 //done
 void IntensityImageStudent::setPixel(int i, Intensity pixel) {
@@ -42,7 +42,7 @@ void IntensityImageStudent::setPixel(int i, Intensity pixel) {
 }
 //done
 Intensity IntensityImageStudent::getPixel(int x, int y) const {
-	return m_pixelStorage[(y * this->getWidth()) + x];
+	return m_pixelStorage[(y * getWidth()) + x];
 }
 //done
 Intensity IntensityImageStudent::getPixel(int i) const {
