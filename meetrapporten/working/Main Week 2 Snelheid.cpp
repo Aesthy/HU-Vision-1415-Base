@@ -97,12 +97,24 @@ bool executeSteps(DLLExecution * executor) {
 		return false;
 	}
 
-	
-	if (!executor->executeLocalizationStep1(true)) {
-		std::cout << "Localization step 1 failed!" << std::endl;
-		return false;
+	std::vector<long long> time;
+
+	for (int i = 0; i < 10000; ++i){
+		bt.start();
+		if (!executor->executeLocalizationStep1(true)) {
+			std::cout << "Localization step 1 failed!" << std::endl;
+			return false;
+		}
+		bt.stop();
+		time.push_back(bt.elapsedMicroSeconds()); \
+			bt.reset();
 	}
-		
+	long long total = 0;
+	for (int i = 0; i < time.size(); ++i){
+		total = total + time[i];
+	}
+	long long average = total / time.size();
+	std::cout << average;
 
 	if (!executor->executeLocalizationStep2(false)) {
 		std::cout << "Localization step 2 failed!" << std::endl;

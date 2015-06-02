@@ -22,17 +22,9 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 	int sampleHeight = imageHeight / samples;
 
 	std::vector<int> blackGraphY(imageHeight);
-
-
-	IntensityImage * imageTMP = ImageFactory::newIntensityImage();
-	HereBeDragons::SonnetCLI(image, *imageTMP);
-	cv::Mat outImage;
-	HereBeDragons::HerLoveForWhoseDearLoveIRiseAndFall(*imageTMP, outImage);
-	cv::cvtColor(outImage, outImage, CV_GRAY2RGB);
-
-
 	std::vector<std::vector<int>> blackGraphsX(samples, std::vector<int>(imageWidth));
 
+	//histogram y
 	for (int y = 0; y < imageHeight; y++){
 		for (int x = 0; x < imageWidth; x++){
 			if (image.getPixel(x, y) == 0){
@@ -40,10 +32,9 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 			}
 		}
 	}
-
+	//histogrammen x
 	for (int i = 0; i < samples; i++){
-		int yHeigth = i * sampleHeight; 
-		cv::line(outImage, cv::Point(0, yHeigth), cv::Point(imageWidth, yHeigth), cv::Scalar(255, 255, 0));
+		int yHeigth = i * sampleHeight;
 		for (int x = 0; x < imageWidth; x++){
 			for (int y = yHeigth; y < yHeigth + sampleHeight; y++){
 				if (image.getPixel(x, y) == 0){
@@ -56,14 +47,10 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 
 	
 	std::pair<int, int> headTop;
-	int peakBegin = 0 , peakEnd = 0, headTopY, headTopYRelative = 0;
+	int peakBegin = 0 , peakEnd = 0, headTopY;
 	bool peakFound = false;
 
-	
-
-	
-
-	//Headtop
+	//Headtop y
 	for (int i = 0; i < blackGraphY.size(); ++i){
 		if (blackGraphY[i] > 5){
 			headTopY = i;
@@ -71,14 +58,7 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 			break;
 		}
 	}
-
-	//headTopYRelative = headTopY;
-	//while (headTopYRelative > sampleHeight){
-	//	headTopYRelative = headTopYRelative - sampleHeight;
-	//}
-
-	//for (int i = headTopY / sampleHeight; i < blackGraphsX.size(); i++){
-	// HoofdX
+	//headTop x links
 	for (int j = 0; j < blackGraphsX[headTopY / sampleHeight].size(); j++){
 		if (blackGraphsX[headTopY / sampleHeight][j] > 2){
 			if (!peakFound){
@@ -86,6 +66,7 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 			}
 		}
 	}
+	//headTop x rechts
 	for (int j = blackGraphsX[headTopY / sampleHeight].size(); j > 0; j--){
 		if (blackGraphsX[headTopY / sampleHeight][j] > 2){
 			if (!peakFound){
@@ -93,34 +74,19 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 			}
 		}
 	}
-		
-	//}
 	headTop.first = (peakBegin + peakEnd)/2;
 	
 
-	cv::circle(outImage, cv::Point(headTop.first, headTop.second), 1, cv::Scalar(0, 0, 255), -1, 8);
-	
 
-
-	//Ogen vinden
-	/*int eyeHeight = 0;
-	for (int i = cheekHeight; i > 0; --i){
-		if (blackGraphY[i] > 50){
-			eyeHeight = i;
-		}
-	}
-
-	cv::circle(outImage, cv::Point(0, eyeHeight), 1, cv::Scalar(0, 0, 255), -1, 8);
-*/
 
 	std::pair<int, int> headWidth(0, 0);
 	int height = 0;
 	bool breaak = false;
 	
 	peakFound = false;
-	//Links
+	//Head links
  	for (int i = 0; i < blackGraphsX.size(); i++){
-		for (int j = 0; j < blackGraphsX[i].size(); j++){ //-3 voor als er rand om image zit
+		for (int j = 0; j < blackGraphsX[i].size(); j++){
 			if (blackGraphsX[i][j] > 5){
 				if (headWidth.first == 0){
 					headWidth.first = j;
@@ -136,32 +102,6 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 					break;
 				}
 			}
-
-		//	if (blackGraphsX[i][j] > 2){
-		//		
-		//		peakBegin = j;
-		//		if (headWidth.first != 0 && headWidth.first + 1 < peakBegin){
-		//			break;
-		//		}
-		//		peakFound = true;
-		//	}
-		//	else if (peakFound){
-		//		if (headWidth.first == 0){
-		//			headWidth.first = peakBegin;
-		//		}
-		//		else if (headWidth.first > peakBegin){
-		//			
-		//			headWidth.first = peakBegin;
-		//			height = i * sampleHeight; // debug
-		//			
-		//		}
-		//		peakEnd = j;
-		//		peakFound = false;
-		//	}
-
-		//}
-		//if (headWidth.first + 1 < peakBegin && headWidth.first != 0){
-		//	break;
 		}
 		if (breaak){
 			break;
@@ -169,7 +109,7 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 	}
 
 	breaak = false;
-	//Rechts
+	//head rechts
 	for (int i = 0; i < blackGraphsX.size(); i++){
 		for (int j = blackGraphsX[i].size(); j > 0; j--){// Due rand
 			if (blackGraphsX[i][j] > 5){
@@ -191,31 +131,9 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 		if (breaak){
 			break;
 		}
-
-
-		//	if (blackGraphsX[i][j] > 2){
-		//		peakBegin = j;
-		//		if (headWidth.first + 1 < peakBegin && headWidth.first != 0){
-		//			break;
-		//		}
-		//		peakFound = true;
-		//	}
-		//	else if (peakFound){
-		//		if (headWidth.second == 0){
-		//			headWidth.second = peakBegin;
-		//		}
-		//		else if (headWidth.second < peakBegin){
-		//			headWidth.second = peakBegin;
-		//			height = i * sampleHeight; //debug
-		//		}
-		//		peakEnd = j;
-		//		peakFound = false;
-		//	}
-		//}
-		//if (headWidth.first + 1 < peakBegin && headWidth.first != 0){
-		//	break;
 	}
 
+	//gemiddelde waarde y histogram
 	int averageY = 0;
 	int max = 0;
 	int div;
@@ -250,7 +168,6 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 		}
 	}
 
-	cv::circle(outImage, cv::Point(0, cheekHeight), 1, cv::Scalar(0, 0, 255), -1, 8);
 
 
 	std::pair<int, int> wang1;
@@ -260,7 +177,7 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 	int wangenHoogte = 0;
 	bool sideFound = 
 	peakFound = false;
-	//Wangen
+	//Wangen x
 	for (int i = (cheekHeight / sampleHeight); i < (cheekHeight / sampleHeight) + 2; i++){
 		for (int j = headWidth.first; j <= headWidth.second; j++){
 			if (blackGraphsX[i][j] > 5){
@@ -306,18 +223,6 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 			break;
 		}
 	}
-
-	std::cout << wangenHoogte;
-
-	cv::circle(outImage, cv::Point(wang1.first, wangenHoogte), 1, cv::Scalar(0, 0, 255), -1, 8);
-	cv::circle(outImage, cv::Point(wang1.second, wangenHoogte), 1, cv::Scalar(0, 0, 255), -1, 8);
-	cv::circle(outImage, cv::Point(wang2.first, wangenHoogte), 1, cv::Scalar(0, 0, 255), -1, 8);
-	cv::circle(outImage, cv::Point(wang2.second, wangenHoogte), 1, cv::Scalar(0, 0, 255), -1, 8);
-
-	cv::circle(outImage, cv::Point(headWidth.first, height), 1, cv::Scalar(0, 0, 255), -1, 8);
-	cv::circle(outImage, cv::Point(headWidth.second, height), 1, cv::Scalar(0, 0, 255), -1, 8);
-
-	
 	
 	for (int j = 0; j < blackGraphsX[wangenHoogte/sampleHeight].size(); j++){
 		if (blackGraphsX[wangenHoogte / sampleHeight][j] > 8){
@@ -326,43 +231,12 @@ bool StudentLocalization::stepFindHead(const IntensityImage &image, FeatureMap &
 		}
 	}
 
-	for (int j = blackGraphsX[wangenHoogte / sampleHeight].size(); j > 0; j--){// Due rand
+	for (int j = blackGraphsX[wangenHoogte / sampleHeight].size(); j > 0; j--){
 		if (blackGraphsX[wangenHoogte / sampleHeight][j] > 8){
 			headWidth.second = (headWidth.second + j) / 2;
 			break;
 		}
 	}
-
-
-	
-
-	
-
-	cv::circle(outImage, cv::Point(headWidth.first, wangenHoogte), 1, cv::Scalar(0, 0, 255), -1, 8);
-	cv::circle(outImage, cv::Point(headWidth.second, wangenHoogte), 1, cv::Scalar(0, 0, 255), -1, 8);
-	
-
-
-
-	RGBImage * outImageRGB = ImageFactory::newRGBImage();
-	HereBeDragons::HeIsContentedThyPoorDrudgeToBe(outImage, *outImageRGB);
-	ImageIO::showImage(*outImageRGB);
-	delete outImageRGB;
-	delete imageTMP;
-
-    std::ofstream myfile;
-    myfile.open ("..\\..\\..\\FaceMinMin\\Localization-1\\CSV\\example.csv");
-    
-	for (int i = 0; i < blackGraphY.size(); i++){
-		myfile <<  std::to_string(blackGraphY[i]) + ",";
-	}
-	for (int i = 0; i < blackGraphsX.size(); i++){
-		myfile << std::endl;
-		for (int j = 0; j < blackGraphsX[i].size(); j++){
-			myfile << std::to_string(blackGraphsX[i][j]) + ",";
-		}
-	}
-    myfile.close();
 
 	features.putFeature(Feature(Feature::FEATURE_HEAD_TOP, Point2D<double>(headTop.first, headTop.second)));
 	features.putFeature(Feature(Feature::FEATURE_HEAD_LEFT_SIDE, Point2D<double>(headWidth.first, wangenHoogte)));

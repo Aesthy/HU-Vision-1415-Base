@@ -5,6 +5,10 @@
 #include <math.h>
 #include <iostream>
 #include <array>
+#include <algorithm>
+
+#include <fstream>
+#include<string>
 
 IntensityImage * StudentPreProcessing::stepToIntensityImage(const RGBImage &image) const {
 	int imageSize = image.getWidth() * image.getHeight();
@@ -13,14 +17,37 @@ IntensityImage * StudentPreProcessing::stepToIntensityImage(const RGBImage &imag
 	for (int i = 0; i < imageSize; ++i){
 		rgb = image.getPixel(i);
 		//Intensity p = (0.2126 * rgb.r) + (0.7152 * rgb.g) + (0.0722 * rgb.b);
+		//Intensity p = (rgb.r + rgb.g + rgb.b) / 3;
+		//Intensity p = (std::max(std::max(rgb.r, rgb.g), rgb.b) + std::min(std::min(rgb.r, rgb.g), rgb.b)) / 2;
 		Intensity p = rgb.g;
 		IM->setPixel(i, p);
 	}	
+
+	//Meetrapport!
+	/*std::vector<int> histo(256);
+
+	std::ofstream myfile;
+	myfile.open("..\\..\\..\\FaceMinMin\\Histo\\hist.csv");
+	for (int y = 0; y < image.getHeight(); y++){
+		for (int x = 0; x < image.getWidth(); x++){
+			histo[IM->getPixel(x, y)] += 1;
+		}
+	}
+
+	for (int i = 0; i < histo.size(); ++i){
+		myfile << std::to_string(histo[i]) + ",";
+	}
+
+	myfile.close();*/
+
+
+
 	return IM;
 }
 
 IntensityImage * StudentPreProcessing::stepScaleImage(const IntensityImage &image) const {
 	IntensityImageStudent* IM = new IntensityImageStudent(image.getWidth(), image.getHeight());
+	// sla het schalen van de image over als de image al van het juist formaat is
 	if (image.getWidth() * image.getHeight() <= 40000){
 		for (int y = 0; y < image.getHeight(); ++y){
 			for (int x = 0; x < image.getWidth(); ++x){
@@ -29,23 +56,27 @@ IntensityImage * StudentPreProcessing::stepScaleImage(const IntensityImage &imag
 		}
 		return IM;
 	}
+	// Bereken waarmee de X en Y as van de image vermenigvuldigd moet worden
+	// om de aspect ratio te behouden
 	int pixelCount = image.getHeight() * image.getWidth();
-	float mult = static_cast<float>(40000) / pixelCount;
-	mult = sqrt(mult);
-	IM = new IntensityImageStudent(image.getWidth() * mult, image.getHeight() * mult);
-
-	float newIntensity = 0;
+	float multiplier = static_cast<float>(40000) / pixelCount;
+	multiplier = sqrt(multiplier);
+	// Schaal de image
+	IM = new IntensityImageStudent(image.getWidth() * multiplier, image.getHeight() * multiplier);
+	// Pas bilinear interpolatie toe om de intensiteit van de pixels in de nieuwe image
+	// te bepalen.
+	Intensity newIntensity = 0;
 	for (int y = 0; y < IM->getHeight(); ++y){
 		for (int x = 0; x < IM->getWidth(); ++x){
-			float oldX = x / mult;
-			float oldY = y / mult;
+			float oldX = x / multiplier;
+			float oldY = y / multiplier;
 			float dX = 1 - (oldX - floor(oldX));
 			float dY = 1 - (oldY - floor(oldY));
 			newIntensity = (dX * dY) * image.getPixel(floor(oldX), floor(oldY));
 			newIntensity += ((1 - dX) * dY) * image.getPixel(floor(oldX) + 1, floor(oldY));
 			newIntensity += (dX * (1 - dY)) * image.getPixel(floor(oldX), floor(oldY) + 1);
 			newIntensity += ((1 - dX) * (1 - dY)) * image.getPixel(floor(oldX) + 1, floor(oldY) + 1);
-			IM->setPixel(x , y, newIntensity);
+			IM->setPixel(x, y, newIntensity);
 		}
 	}
 	return IM;
