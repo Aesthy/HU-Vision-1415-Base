@@ -47,6 +47,8 @@ int main(int argc, char * argv[]) {
 		}
 	}
 
+	//std::cout << "Elapsed time in microseconds: " << bt.elapsedMicroSeconds() << std::endl;
+
 	delete executor;
 	system("pause");
 	return 1;
@@ -64,26 +66,25 @@ int main(int argc, char * argv[]) {
 bool executeSteps(DLLExecution * executor) {
 
 	//Execute the four Pre-processing steps
-	if (!executor->executePreProcessingStep1(false)) {
+	if (!executor->executePreProcessingStep1(true)) {
 		std::cout << "Pre-processing step 1 failed!" << std::endl;
 		return false;
 	}
 
-
-	if (!executor->executePreProcessingStep2(false)) {
+	if (!executor->executePreProcessingStep2(true)) {
 		std::cout << "Pre-processing step 2 failed!" << std::endl;
 		return false;
 	}
 
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep2, ImageIO::getDebugFileName("Pre-processing-2.png"));
-	if (!executor->executePreProcessingStep3(false)) {
+	if (!executor->executePreProcessingStep3(true)) {
 		std::cout << "Pre-processing step 3 failed!" << std::endl;
 		return false;
 	}
 
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep3, ImageIO::getDebugFileName("Pre-processing-3.png"));
 
-	if (!executor->executePreProcessingStep4(false)) {
+	if (!executor->executePreProcessingStep4(true)) {
 		std::cout << "Pre-processing step 4 failed!" << std::endl;
 		return false;
 	}
@@ -98,7 +99,7 @@ bool executeSteps(DLLExecution * executor) {
 	}
 
 	
-	if (!executor->executeLocalizationStep1(true)) {
+	if (!executor->executeLocalizationStep1(false)) {
 		std::cout << "Localization step 1 failed!" << std::endl;
 		return false;
 	}

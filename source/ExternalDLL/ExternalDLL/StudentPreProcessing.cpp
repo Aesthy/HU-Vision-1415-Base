@@ -6,6 +6,7 @@
 #include <iostream>
 #include <array>
 #include <algorithm>
+#include "basetimer.h"
 
 #include <fstream>
 #include<string>
@@ -70,6 +71,7 @@ IntensityImage * StudentPreProcessing::stepScaleImage(const IntensityImage &imag
 		for (int x = 0; x < IM->getWidth(); ++x){
 			float oldX = x / multiplier;
 			float oldY = y / multiplier;
+			//bilinear
 			float dX = 1 - (oldX - floor(oldX));
 			float dY = 1 - (oldY - floor(oldY));
 			newIntensity = (dX * dY) * image.getPixel(floor(oldX), floor(oldY));
@@ -77,6 +79,9 @@ IntensityImage * StudentPreProcessing::stepScaleImage(const IntensityImage &imag
 			newIntensity += (dX * (1 - dY)) * image.getPixel(floor(oldX), floor(oldY) + 1);
 			newIntensity += ((1 - dX) * (1 - dY)) * image.getPixel(floor(oldX) + 1, floor(oldY) + 1);
 			IM->setPixel(x, y, newIntensity);
+
+			//nearest-neighbor
+			//IM->setPixel(x, y, image.getPixel(floor(oldX), floor (oldY)));
 		}
 	}
 	return IM;
